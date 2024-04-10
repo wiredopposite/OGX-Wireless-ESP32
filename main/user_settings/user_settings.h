@@ -58,6 +58,7 @@ struct UserProfile
 // void init_user_settings();
 bool store_user_profile(int idx, uint8_t profile_id, const UserProfile& profile);
 bool store_active_profile_id(int idx, uint8_t profile_id);
+bool retrieve_active_profile_id(int idx, uint8_t* profile_id_buffer);
 bool retrieve_user_profile(uint8_t profile_id, UserProfile* profile_buffer);
 
 #endif // USER_SETTINGS_H_

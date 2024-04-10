@@ -55,12 +55,12 @@ struct BP32Gamepad
     UserProfile profile;
     uint8_t input_mode_id {0};
     uint8_t slave_address;
+    bool new_out_packet;
     i2cOutPacket i2c_out_packet;
     // i2cInPacket i2c_in_packet;
 };
 
-extern BP32Gamepad bp32_gamepad[];
-
+BP32Gamepad* get_gamepad(int idx);
 void process_in_packet(int idx, i2cInPacket in_packet);
 
 #endif // SHARED_H_

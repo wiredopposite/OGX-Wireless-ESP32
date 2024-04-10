@@ -69,24 +69,8 @@ void init_reset_button()
     gpio_config(&io_conf);
 }
 
-// void init_leds()
-// {
-//     const int led_indicator_pins[] = LED_INDICATOR_PINS;
-
-//     for (int i = 0; i < MAX_GAMEPADS; ++i) 
-//     {
-//         led_info.pin[i] = (gpio_num_t)led_indicator_pins[i];
-//         gpio_reset_pin(led_info.pin[i]);
-//         gpio_set_direction(led_info.pin[i], GPIO_MODE_OUTPUT);
-//         gpio_set_level(led_info.pin[i], 0);
-//     }
-// }
-
 void init_leds()
 {
-    touch_pad_init();
-    touch_pad_deinit();
-
     const int led_indicator_pins[] = LED_INDICATOR_PINS;
 
     for (int i = 0; i < MAX_GAMEPADS; ++i) 
@@ -97,9 +81,6 @@ void init_leds()
         gpio_set_direction(led_info.pin[i], GPIO_MODE_OUTPUT);
         gpio_set_level(led_info.pin[i], 0);
     }
-    // // Disable touch pad functionality for specific pins.
-    // touch_pad_io_deinit(TOUCH_PAD_NUM9); // GPIO32
-    // touch_pad_io_deinit(TOUCH_PAD_NUM8); // GPIO33
 }
 
 void gpio_task(void* param)
@@ -108,6 +89,13 @@ void gpio_task(void* param)
 
     init_leds();
     init_reset_button();
+
+    BP32Gamepad* gamepads[MAX_GAMEPADS];
+
+    for (int i = 0; i < MAX_GAMEPADS; i++) 
+    {
+        gamepads[i] = get_gamepad(i);
+    }
 
     while(1)
     {
@@ -120,7 +108,7 @@ void gpio_task(void* param)
 
             for (int i = 0; i < MAX_GAMEPADS; i++) 
             {
-                if (bp32_gamepad[i].device_ptr == nullptr)
+                if (gamepads[i]->device_ptr == nullptr)
                 {
                     gpio_set_level(led_info.pin[i], led_info.blink_state ? 1 : 0);
                 }
@@ -137,3 +125,37 @@ void gpio_task(void* param)
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
+
+// void init_gpio()
+// {
+//     init_leds();
+//     init_reset_button();
+// }
+
+// void gpio_task()
+// {
+//     unsigned long current_ms = esp_timer_get_time() / 1000;
+
+//     if (current_ms - led_info.last_blink_time >= LED_BLINK_INTERVAL_MS) 
+//     {
+//         led_info.blink_state = !led_info.blink_state;
+//         led_info.last_blink_time = current_ms;
+
+//         for (int i = 0; i < MAX_GAMEPADS; i++) 
+//         {
+//             if (bp32_gamepad[i].device_ptr == nullptr)
+//             {
+//                 gpio_set_level(led_info.pin[i], led_info.blink_state ? 1 : 0);
+//             }
+//             else
+//             {
+//                 gpio_set_level(led_info.pin[i], 1);
+
+//             }
+//         }
+//     }
+
+//     check_reset_button();
+
+//     vTaskDelay(pdMS_TO_TICKS(10));
+// }

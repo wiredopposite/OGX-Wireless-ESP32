@@ -152,3 +152,34 @@ bool retrieve_uint8_from_nvs(uint8_t* buffer, const char* key)
 
     return true;
 }
+
+bool blob_exists_in_nvs(const char* key, size_t* len)
+{
+    esp_err_t err;
+    nvs_handle_t handle;
+
+    err = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &handle);
+
+    if (err != ESP_OK) 
+    {
+        printf("Failed to open NVS for reading '%s'. Error: %s\n", key, esp_err_to_name(err));
+        return false;
+    }
+
+    err = nvs_get_blob(handle, key, NULL, len);
+
+    nvs_close(handle);
+
+    if (err == ESP_ERR_NVS_NOT_FOUND) 
+    {
+        printf("Blob for '%s' not found.\n", key);
+        return false;
+    } 
+    else if (err != ESP_OK) 
+    {
+        printf("Failed to get blob for '%s'. Error: %s\n", key, esp_err_to_name(err));
+        return false;
+    }
+
+    return true;
+}

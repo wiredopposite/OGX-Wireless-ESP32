@@ -40,6 +40,22 @@ bool retrieve_active_profile_id(int idx, uint8_t* profile_id_buffer)
     return retrieve_uint8_from_nvs(profile_id_buffer, profile_id_key);
 }
 
+bool profile_exists_in_nvs(uint8_t profile_id)
+{
+    char profile_key[NVS_PROFILE_KEY_SIZE];
+    get_variable_nvs_key(profile_key, NVS_PROFILE_KEY_SIZE, NVS_PROFILE_KEY_PREFIX, (int)profile_id);
+
+    size_t size = 0;
+
+    if (blob_exists_in_nvs(profile_key, &size))
+    {
+        if (size == sizeof(UserProfile))
+        return true;
+    }
+
+    return false;
+}
+
 bool store_user_profile(int idx, uint8_t profile_id, const UserProfile& profile)
 {   
     char profile_key[NVS_PROFILE_KEY_SIZE];
@@ -49,7 +65,8 @@ bool store_user_profile(int idx, uint8_t profile_id, const UserProfile& profile)
     {
         if (store_active_profile_id(idx, profile_id))
         {
-            bp32_gamepad[idx].profile = profile;
+            BP32Gamepad* gamepad = get_gamepad(idx);
+            gamepad->profile = profile;
             printf("Settings stored for profile %d\n", profile_id);
             return true;
         }
@@ -80,6 +97,13 @@ bool retrieve_user_profile(uint8_t profile_id, UserProfile* profile_buffer)
 
 void init_user_settings()
 {
+    BP32Gamepad* gamepads[MAX_GAMEPADS];
+
+    for (int i = 0; i < MAX_GAMEPADS; i++) 
+    {
+        gamepads[i] = get_gamepad(i);
+    }
+
     esp_err_t err = nvs_flash_init();
 
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || 
@@ -96,7 +120,7 @@ void init_user_settings()
 
         for (int i = 0; i < MAX_GAMEPADS; i++) 
         {
-            bp32_gamepad[i].profile = get_default_profile(DEFAULT_PROFILE_ID);
+            gamepads[i]->profile = get_default_profile(DEFAULT_PROFILE_ID);
         }
 
         return;
@@ -106,10 +130,9 @@ void init_user_settings()
 
     for (int i = 0; i < MAX_PROFILES; i++)
     {
-        UserProfile temp_profile;
         uint8_t temp_profile_id = i + 1;
 
-        if (!retrieve_user_profile(temp_profile_id, &temp_profile))
+        if (!profile_exists_in_nvs(temp_profile_id))
         {
             new_profiles = true;
 
@@ -144,7 +167,7 @@ void init_user_settings()
             profile = get_default_profile(DEFAULT_PROFILE_ID);
         }
         
-        bp32_gamepad[i].profile = profile;
+        gamepads[i]->profile = profile;
 
         vTaskDelay(5);
     }

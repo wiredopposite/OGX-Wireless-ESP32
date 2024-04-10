@@ -2,6 +2,7 @@
 #include "freertos/task.h"
 #include "driver/i2c.h"
 #include "esp_log.h"
+#include "esp_timer.h"
 #include "sdkconfig.h"
 
 #include "board_config.h"
@@ -10,6 +11,8 @@
 
 #define I2C_MASTER_NUM       I2C_NUM_0
 #define I2C_MASTER_FREQ_HZ   400000
+
+#define POLLING_RATE_MS 5
 
 void init_i2c()
 {
@@ -29,7 +32,7 @@ void init_i2c()
 
 esp_err_t i2c_write(uint8_t device_address, const uint8_t* data, size_t data_len) 
 {
-    return i2c_master_write_to_device(I2C_MASTER_NUM, device_address, data, data_len, pdMS_TO_TICKS(1000));
+    return i2c_master_write_to_device(I2C_MASTER_NUM, device_address, data, data_len, pdMS_TO_TICKS(50));
 }
 
 esp_err_t i2c_read(uint8_t device_address, uint8_t* data, size_t data_len) 
@@ -59,49 +62,86 @@ void i2c_task(void* param)
 
     init_i2c();
 
-    static i2cOutPacket prev_out_packet[MAX_GAMEPADS] = {};
     esp_err_t err;
+
+    BP32Gamepad* gamepads[MAX_GAMEPADS];
+
+    for (int i = 0; i < MAX_GAMEPADS; i++) 
+    {
+        gamepads[i] = get_gamepad(i);
+    }
 
     while (1)
     {
+        unsigned long start_ms = esp_timer_get_time() / 1000;
+
         for (int i = 0; i < MAX_GAMEPADS; i++)
         {
-            if (bp32_gamepad[i].device_ptr != nullptr)
+            if (gamepads[i]->device_ptr != nullptr)
             {
-                if (memcmp(&bp32_gamepad[i].i2c_out_packet, &prev_out_packet[i], sizeof(i2cOutPacket)) != 0)
+                if (gamepads[i]->new_out_packet)
                 {
-                    err = i2c_write(bp32_gamepad[i].slave_address, (const uint8_t*)&bp32_gamepad[i].i2c_out_packet, sizeof(i2cOutPacket));
+                    i2cOutPacket i2c_out_packet = gamepads[i]->i2c_out_packet;
+                    
+                    gamepads[i]->new_out_packet = false;
 
-                    vTaskDelay(pdMS_TO_TICKS(1));
+                    err = i2c_write(gamepads[i]->slave_address, (uint8_t*)&i2c_out_packet, sizeof(i2cOutPacket));
 
                     if (err != ESP_OK) 
                     {
-                        // printf("Error on I2C slave %d write: %s\n", bp32_gamepad[i].slave_address, esp_err_to_name(err));
-                        vTaskDelay(pdMS_TO_TICKS(1));
+                        #if (OGXW_DEBUG > 0)
+                        printf("Error on I2C slave %d write: %s\n", gamepads[i]->slave_address, esp_err_to_name(err));
+                        #endif
+
                         continue;
                     }
-
-                    prev_out_packet[i] = bp32_gamepad[i].i2c_out_packet;
                 }
+
+                vTaskDelay(1);
 
                 i2cInPacket i2c_in_packet;
 
-                err = i2c_read(bp32_gamepad[i].slave_address, (uint8_t*)&i2c_in_packet, sizeof(i2cInPacket));
+                err = i2c_read(gamepads[i]->slave_address, (uint8_t*)&i2c_in_packet, sizeof(i2cInPacket));
 
                 if (err == ESP_OK)
                 {
                     process_in_packet(i, i2c_in_packet);
                 }
-                
-                // if (err != ESP_OK) 
-                // {
-                //     printf("Error on I2C slave %d read: %s\n", bp32_gamepad[i].slave_address, esp_err_to_name(err));
-                // }
+                #if (OGXW_DEBUG > 0)
+                else 
+                {
+                    printf("Error on I2C slave %d read: %s\n", gamepads[i]->slave_address, esp_err_to_name(err));
+                }
+                #endif
+
+                vTaskDelay(1);
             }
 
-            vTaskDelay(pdMS_TO_TICKS(1));
+            vTaskDelay(1);
         }
 
-        vTaskDelay(1);
+        unsigned long current_ms = esp_timer_get_time() / 1000;
+        unsigned long length_ms = current_ms - start_ms;
+
+        if (length_ms < POLLING_RATE_MS)
+        {
+            vTaskDelay(pdMS_TO_TICKS(POLLING_RATE_MS - length_ms));
+        }
     }
 }
+
+// typedef struct {
+//     int idx;
+//     i2cInPacket in_packet;
+// } ProcessInPacketParams;
+
+// void processInPacketTask(void *pvParameters) {
+//     ProcessInPacketParams *params = (ProcessInPacketParams *)pvParameters;
+//     process_in_packet(params->idx, params->in_packet);
+
+//     // Clean up allocated memory, if dynamically allocated in Step 3
+//     free(pvParameters);
+
+//     // Delete the task when finished
+//     vTaskDelete(NULL);
+// }

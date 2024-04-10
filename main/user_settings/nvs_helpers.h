@@ -6,6 +6,7 @@
 #define NVS_NAMESPACE "user_data"
 
 bool erase_all_nvs_keys(const char *namespace_name);
+bool blob_exists_in_nvs(const char* key, size_t* len);
 
 bool write_blob_to_nvs(const uint8_t* blob, size_t len, const char* key);
 bool retrieve_blob_from_nvs(uint8_t* buffer, size_t* len, const char* key);
