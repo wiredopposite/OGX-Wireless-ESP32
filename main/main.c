@@ -16,8 +16,6 @@
 
 void app_main(void)
 {
-    init_user_settings();
-
     xTaskCreatePinnedToCore(
         gpio_task,
         "gpio",

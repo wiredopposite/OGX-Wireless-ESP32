@@ -223,7 +223,7 @@ void process_in_packet(int idx, i2cInPacket in_packet)
         unsigned long current_ms = esp_timer_get_time() / 1000;
 
         if (((in_packet.rumble_l + in_packet.rumble_r) > 0) &&
-            current_ms - last_rumble[idx] >= (rumble_length_ms + 1))
+            (current_ms - last_rumble[idx] > rumble_length_ms))
         {
             #if (OGXW_DEBUG > 0)
             printf("IDX: %d | rumble right: %d | rumble left: %d\n", idx, in_packet.rumble_r, in_packet.rumble_l);
