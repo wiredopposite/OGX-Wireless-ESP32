@@ -11,7 +11,7 @@
 #include "gpio_task.h"
 
 #define LED_BLINK_INTERVAL_MS 500
-#define BT_RESET_DEBOUNCE_MS 1000
+#define BT_RESET_DEBOUNCE_MS 2000
 
 struct LEDInfo
 {

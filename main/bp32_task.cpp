@@ -271,7 +271,7 @@ void bp32_task(void* param)
     // Don't use BTstack buffered UART. It conflicts with the console.
 // #ifdef CONFIG_ESP_CONSOLE_UART
 // #ifndef CONFIG_BLUEPAD32_USB_CONSOLE_ENABLE
-    // btstack_stdio_init();
+//     btstack_stdio_init();
 // #endif  // CONFIG_BLUEPAD32_USB_CONSOLE_ENABLE
 // #endif  // CONFIG_ESP_CONSOLE_UART
 
