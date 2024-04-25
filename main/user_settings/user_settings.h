@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include "user_settings/user_settings_c.h"
 
 #define MASK_DPAD_UP      0x0001
 #define MASK_DPAD_DOWN    0x0002
@@ -55,7 +54,7 @@ struct UserProfile
     uint16_t misc ;
 } __attribute__((__packed__));
 
-// void init_user_settings();
+void init_user_settings();
 bool store_user_profile(int idx, uint8_t profile_id, const UserProfile& profile);
 bool store_active_profile_id(int idx, uint8_t profile_id);
 bool retrieve_active_profile_id(int idx, uint8_t* profile_id_buffer);

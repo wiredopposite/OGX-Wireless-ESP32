@@ -11,13 +11,10 @@
 #include <uni.h>
 
 #include "ble_server/ble_server.h"
-#include "user_settings/user_settings.h"
-#include "user_settings/user_settings_c.h"
 #include "utilities/scaling.h"
 #include "board_config.h"
 #include "bp32_task.h"
-#include "shared.h"
-#include "i2c_task.h"
+#include "tasks.h"
 
 BP32Gamepad bp32_gamepad[MAX_GAMEPADS];
 

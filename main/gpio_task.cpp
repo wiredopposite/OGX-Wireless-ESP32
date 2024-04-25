@@ -6,9 +6,9 @@
 
 #include <uni.h>
 
-#include "shared.h"
+#include "tasks.h"
+#include "bp32_task.h"
 #include "board_config.h"
-#include "gpio_task.h"
 
 #define LED_BLINK_INTERVAL_MS 500
 #define BT_RESET_DEBOUNCE_MS 2000
@@ -125,37 +125,3 @@ void gpio_task(void* param)
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
-
-// void init_gpio()
-// {
-//     init_leds();
-//     init_reset_button();
-// }
-
-// void gpio_task()
-// {
-//     unsigned long current_ms = esp_timer_get_time() / 1000;
-
-//     if (current_ms - led_info.last_blink_time >= LED_BLINK_INTERVAL_MS) 
-//     {
-//         led_info.blink_state = !led_info.blink_state;
-//         led_info.last_blink_time = current_ms;
-
-//         for (int i = 0; i < MAX_GAMEPADS; i++) 
-//         {
-//             if (bp32_gamepad[i].device_ptr == nullptr)
-//             {
-//                 gpio_set_level(led_info.pin[i], led_info.blink_state ? 1 : 0);
-//             }
-//             else
-//             {
-//                 gpio_set_level(led_info.pin[i], 1);
-
-//             }
-//         }
-//     }
-
-//     check_reset_button();
-
-//     vTaskDelay(pdMS_TO_TICKS(10));
-// }

@@ -6,7 +6,8 @@
 #include "sdkconfig.h"
 
 #include "board_config.h"
-#include "shared.h"
+#include "tasks.h"
+#include "bp32_task.h"
 #include "i2c_task.h"
 
 #define I2C_MASTER_NUM       I2C_NUM_0
@@ -129,19 +130,3 @@ void i2c_task(void* param)
         }
     }
 }
-
-// typedef struct {
-//     int idx;
-//     i2cInPacket in_packet;
-// } ProcessInPacketParams;
-
-// void processInPacketTask(void *pvParameters) {
-//     ProcessInPacketParams *params = (ProcessInPacketParams *)pvParameters;
-//     process_in_packet(params->idx, params->in_packet);
-
-//     // Clean up allocated memory, if dynamically allocated in Step 3
-//     free(pvParameters);
-
-//     // Delete the task when finished
-//     vTaskDelete(NULL);
-// }

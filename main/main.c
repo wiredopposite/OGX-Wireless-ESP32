@@ -2,10 +2,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-#include "bp32_task.h"
-#include "i2c_task.h"
-#include "gpio_task.h"
-#include "user_settings/user_settings_c.h"
+#include "tasks.h"
 #include "board_config.h"
 
 #define STACK_MULTIPLIER (2048 * MAX_GAMEPADS)

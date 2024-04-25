@@ -7,7 +7,7 @@
 #include "user_settings/user_settings.h"
 #include "user_settings/nvs_helpers.h"
 #include "board_config.h"
-#include "shared.h"
+#include "bp32_task.h"
 
 #define NVS_PROFILE_KEY_PREFIX "profile"
 #define NVS_PROFILE_KEY_SIZE (sizeof(NVS_PROFILE_KEY_PREFIX) + 3 + 1)
