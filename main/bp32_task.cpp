@@ -215,7 +215,8 @@ void process_in_packet(int idx, i2cInPacket in_packet)
     
     if (in_packet.packet_id == PACKET_ID_RUMBLE &&
         in_packet.packet_size == sizeof(i2cInPacket) &&
-        bp32_gamepad[idx].device_ptr != nullptr)
+        bp32_gamepad[idx].device_ptr != nullptr &&
+        bp32_gamepad[idx].device_ptr->vendor_id != 0x057E)
     {
         unsigned long current_ms = esp_timer_get_time() / 1000;
 
